@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>origin pool</title>
+<style type="text/css">
+table.gridtable {
+	font-family: verdana,arial,sans-serif;
+	font-size:11px;
+	color:#333333;
+	border-width: 1px;
+	border-color: #666666;
+	border-collapse: collapse;
+}
+table.gridtable th {
+	border-width: 1px;
+	padding: 8px;
+	border-style: solid;
+	border-color: #666666;
+	background-color: #dedede;
+}
+table.gridtable td {
+	border-width: 1px;
+	padding: 8px;
+	border-style: solid;
+	border-color: #666666;
+	background-color: #ffffff;
+}
+</style>
+
+</head>
+<body>
+	<h1>origin pool</h1>
+<p>
+<form id="form1" name="form1" method="get" action="search.php">
+  <label>search (your ORC address):
+  <input type="text" name="address" id="address" />
+  </label>
+  <label>
+  <input type="submit" name="submit" id="submit" value="submit" />
+  </label>
+</form>
+</p>
+
+<h5>Pool Info</h5>
+<table class="gridtable">
+		<tr>
+			<th>HEIGHT</th>
+			<th>REWARD</th>
+			<th>DIFF</th>
+			<th>PRV BLOCK HASH</th>
+		</tr>
+<tr>
+	<td><?=$d['height']?></td>
+	<td><?=$d['reward']?></td>
+	<td><?=$d['difficulty']?></td>
+	<td><?=$d['block']?></td>
+</tr>
+</table>
+
+<h5>User submission</h5>
+<table class="gridtable">
+		<tr>
+			<th>HEIGHT</th>
+			<th>USER</th>
+			<th>RATE</th>
+			<th>DL</th>
+		</tr>
+<tr>
+<?php
+foreach ($res_tdata as $key=>$value) {
+	echo '<tr>';
+	echo '<td>';
+	echo $value['height'];
+	echo '</td>';
+
+	echo '<td>';
+	echo $value['user']['address'];
+	echo '</td>';
+
+	echo '<td>';
+	echo number_format($value['rate'], 3, '.', '');
+	echo '</td>';
+
+	echo '<td>';
+	echo $value['dl'];
+	echo '</td>';
+
+	echo '</tr>';
+}
+?>
+</tr>
+</table>
+
+<h5>Blocks from a mine</h5>
+<table class="gridtable">
+		<tr>
+			<th>HEIGHT</th>
+			<th>USER</th>
+			<th>REWARD</th>
+			<th>STATE</th>
+		</tr>
+<tr>
+<?php
+foreach ($res_own as $key=>$value) {
+	echo '<tr>';
+	echo '<td>';
+	echo $value['height'];
+	echo '</td>';
+
+	echo '<td>';
+	echo $value['user']['address'];
+	echo '</td>';
+
+	echo '<td>';
+	echo $value['reward'];
+	echo '</td>';
+
+	echo '<td>';
+		if($value['already']==1){
+			echo 'already';
+		}else{
+			echo 'waitting';
+		}
+	
+	echo '</td>';
+
+	echo '</tr>';
+}
+?>
+</tr>
+</table>
+
+
+</body>
+</html>

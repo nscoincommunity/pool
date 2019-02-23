@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>origin pool search</title>
+<style type="text/css">
+table.gridtable {
+	font-family: verdana,arial,sans-serif;
+	font-size:11px;
+	color:#333333;
+	border-width: 1px;
+	border-color: #666666;
+	border-collapse: collapse;
+}
+table.gridtable th {
+	border-width: 1px;
+	padding: 8px;
+	border-style: solid;
+	border-color: #666666;
+	background-color: #dedede;
+}
+table.gridtable td {
+	border-width: 1px;
+	padding: 8px;
+	border-style: solid;
+	border-color: #666666;
+	background-color: #ffffff;
+}
+</style>
+
+</head>
+<body>
+	<h1>origin pool search</h1>
+
+<h5><a href="/index.php">Index</a></h5>
+
+<h5>USER</h5>
+<table class="gridtable">
+		<tr>
+			<th>ID</th>
+			<th>ADDRESS</th>
+			<th>BALANCE</th>
+		</tr>
+<tr>
+	<td><?=$res_user['id']?></td>
+	<td><?=$res_user['address']?></td>
+	<td><?=$res_user['balance']?></td>
+</tr>
+</table>
+<h5>USER DATA</h5>
+<table class="gridtable">
+		<tr>
+			<th>HEIGHT</th>
+			<th>RATE</th>
+			<th>DL</th>
+		</tr>
+<tr>
+	<td><?=$tdata_res['height']?></td>
+	<td><?=$tdata_res['rate']?></td>
+	<td><?=$tdata_res['dl']?></td>
+</tr>
+
+</table>
+
+<h5>WORK</h5>
+<table class="gridtable">
+		<tr>
+			<th>WORK ID</th>
+			<th>LAST SUMBIT BLOCK</th>
+		</tr>
+<tr>
+<?php
+foreach ($work_res as $key=>$value) {
+	echo '<tr>';
+	echo '<td>';
+	echo $value['work'];
+	echo '</td>';
+
+	echo '<td>';
+	echo $value['height'];
+	echo '</td>';
+
+	echo '</tr>';
+}
+?>
+</tr>
+</table>
+
+<h5>Send record</h5>
+<table class="gridtable">
+		<tr>
+			<th>AMOUNT</th>
+			<th>TIME</th>
+		</tr>
+<tr>
+<?php
+foreach ($send_res as $key=>$value) {
+	echo '<tr>';
+	echo '<td>';
+	echo $value['amount'];
+	echo '</td>';
+
+	echo '<td>';
+	echo date("Y-m-d H:i",$value['timee']);
+	echo '</td>';
+
+	echo '</tr>';
+}
+?>
+</tr>
+</table>
+
+<h5>Win Blocks</h5>
+<table class="gridtable">
+		<tr>
+			<th>BLOCK Height</th>
+			<th>BLOCK Reward</th>
+			<th>STATE</th>
+		</tr>
+<tr>
+<?php
+foreach ($own_res as $key=>$value) {
+	echo '<tr>';
+	echo '<td>';
+	echo $value['height'];
+	echo '</td>';
+
+	echo '<td>';
+	echo $value['reward'];
+	echo '</td>';
+
+	echo '<td>';
+		if($value['already']==1){
+			echo 'already';
+		}else{
+			echo 'waitting';
+		}
+	echo '</td>';
+
+	echo '</tr>';
+}
+?>
+</tr>
+</table>
+</body>
+</html>
