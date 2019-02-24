@@ -124,11 +124,7 @@ class pooll {
 		}
 
 		//submit
-		if ($result<=50) {
-			system('php loop.php '.$userr['id'].' '.$argon1.' '.$nonce1.' > /dev/null 2>&1  &');
-		}else{
-			system('php loop.php > /dev/null 2>&1  &');
-		}
+		system($this->config['php_path'].'php loop.php '.escapeshellarg($userr['id']).' '.escapeshellarg($argon1).' '.escapeshellarg($nonce1).' '.$result.' > /dev/null 2>&1  &');
 		
 
 		return true;

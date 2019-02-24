@@ -84,13 +84,14 @@ class loop{
             return false;
         }
         $data = json_decode($res, true);
+
         if ($data['result'] == 'ok') {
             return true;
         } else {
             return false;
         }
     }
-	public function index($userid='',$argon='',$nonce=''){
+	public function index($userid='',$argon='',$nonce='',$result=51){
 		if ($this->check_lock()==false) {
 			exit;
 		}
@@ -102,7 +103,7 @@ class loop{
 		$sql=OriginSql::getInstance();
 		$tdataa=$sql->select('tdata','nonce,argon,userid',0,array("height=".$d['height'],'dl<=50'),'dl ASC',0);
 
-		if ($userid!='' and $argon!='' and $nonce!='') {
+		if ($userid!='' and $argon!='' and $nonce!='' and ($result-50)<=0) {
 			$tdataa[]=[
 				'userid'=>$userid,
 				'argon'=>$argon,
@@ -111,6 +112,7 @@ class loop{
 		}
 		//submit
 		foreach ($tdataa as $key => $value) {
+
 			$res=$this->submit($value['nonce'],$value['argon']);
 			if ($res===true) {
 				$sql->add('ownblock',array(
@@ -174,8 +176,8 @@ if (php_sapi_name() != 'cli') {
 		exit;
 }
 $loop=new loop();
-if (isset($argv[1]) and isset($argv[2]) and isset($argv[3])) {
-	$loop->index($argv[1],$argv[2],$argv[3]);
+if (isset($argv[1]) and isset($argv[2]) and isset($argv[3]) and isset($argv[4])) {
+	$loop->index($argv[1],$argv[2],$argv[3],$argv[4]);
 }else{
 	$loop->index();
 }
