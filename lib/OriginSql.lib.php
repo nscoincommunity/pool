@@ -33,6 +33,8 @@ class OriginSql{
 												'userid' => 'num',
 												'rate' => 'num',
 												'dl' => 'num',
+												'argon' => 'string',
+												'nonce' => 'string',
 												),
 								'user'=>array(
 												'id' => 'num',

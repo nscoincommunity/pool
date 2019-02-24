@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50725
 File Encoding         : 65001
 
-Date: 2019-02-24 03:32:26
+Date: 2019-02-24 17:24:00
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -77,6 +77,8 @@ CREATE TABLE `tdata` (
   `userid` int(11) NOT NULL,
   `rate` float(10,0) unsigned zerofill DEFAULT NULL,
   `dl` int(11) DEFAULT NULL,
+  `argon` varbinary(128) DEFAULT NULL,
+  `nonce` varbinary(128) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `height` (`height`),
   KEY `userid` (`userid`) USING BTREE

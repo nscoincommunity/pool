@@ -87,10 +87,23 @@ class pooll {
 		//tdata
 		$tdataa=$sql->select('tdata','*',1,array("userid=".$userr['id']),'',1);
 		if (!$tdataa) {
-			$sql->add('tdata',array('userid'=>$userr['id'],'rate'=>0,'height'=>$d['height'],'dl'=>$result));
+			$sql->add(
+				'tdata',array(
+				'userid'=>$userr['id'],
+				'rate'=>0,
+				'height'=>$d['height'],
+				'dl'=>$result,
+				'argon'=>$argon1,
+				'nonce'=>$nonce1
+			));
 		}else{
 			if ($tdataa['dl']>$result or $tdataa['height']!=$d['height']) {
-				$sql->update('tdata',array('dl'=>$result,'height'=>$d['height']),array("userid=".$userr['id']));
+				$sql->update('tdata',array(
+					'dl'=>$result,
+					'height'=>$d['height'],
+					'argon'=>$argon1,
+					'nonce'=>$nonce1
+				),array("userid=".$userr['id']));
 			}
 		}
 
@@ -111,55 +124,13 @@ class pooll {
 		}
 
 		//submit
-		if ($result < 50) {
-			if ($this->submit($nonce1,$argon1)===true) {
-				//submit success update balance
-				// 'insert into ownblock set `height`=1142,`ownerid`=7,`reward`=1.00000000'
-				// $sql_str='insert into ownblock set `height`='.$d['height'].',`ownerid`='.$userr['id'].',`reward`='.$d['reward'];
-				// echo $sql_str;
-				// $sql->exec('insert into ownblock set `height`='.$d['height'].',`ownerid`='.$userr['id'].',`reward`='.$d['reward']);
-				$sql->add('ownblock',array('height'=>$d['height'],'ownerid'=>$userr['id'],'reward'=>$d['reward'],'already'=>0));
-
-				$ress=$sql->select('ownblock','*',0,array("height<=".($d['height']-10),"height>=".($d['height']-1000),'already=0'),'',0);
-				foreach ($ress as $value) {
-					$re=$this->peer_post($this->config['node'].'/Uinterface.php?m=getblockhash', ['height'=>$value['height']], 5);
-					if (isset($re['result']) and $re['error']=='') {
-						$hash=$re['result'];
-						$re=$this->peer_post($this->config['node'].'/Uinterface.php?m=getblock', ['blockhash'=>$hash], 5);
-						if (isset($re['result']) and $re['error']=='') {
-							if ($re['result']['generator']==$this->config['address']) {
-								// $sql->delete('ownblock',array("id=".$value['id']));
-								$sql->update('ownblock',array('already'=>1),array("id=".$value['id']));
-
-								$res_u=$sql->select('tdata','*',0,array("height=".$d['height']),'',0);
-								if ($res_u) {
-									foreach ($res_u as $value_u) {
-										
-										$your_reward=$value['reward']*$value_u['rate'];
-										$your_reward=sprintf("%.2f",$your_reward);
-										$uuu=$sql->select('user','*',1,array("id=".$value_u['userid']),'',1);
-										$sql->update('user',array('balance'=>($uuu['balance']+$your_reward)),array("id=".$value_u['userid']));
-										
-									}
-								}
-
-
-
-							}
-						}
-					}
-				}
-
-			}
+		if ($result<=50) {
+			system('php loop.php '.$userr['id'].' '.$argon1.' '.$nonce1.' > /dev/null 2>&1  &');
+		}else{
+			system('php loop.php > /dev/null 2>&1  &');
 		}
-		//send coin to user
-		$ress=$sql->select('user','*',0,array("balance>=".$this->config['min_pay']),'',0);
-		foreach ($ress as $value) {
-			$res=$sql->update('user',array('balance'=>0),array("id='".$value['id']."'"));
-			if ($this->peer_post($this->config['node'].'/Uinterface.php?m=sendtoaddress',array('fromaddress' =>$this->config['address'],'toaddress'=>$value['address'],'privatekey'=>$this->config['private_key'],'amount'=>$value['balance']),5)) {
-				$sql->add('send_',array('userid'=>$value['id'],'amount'=>$value['balance'],'timee'=>time()));
-			}
-		}
+		
+
 		return true;
 
 	}
@@ -170,73 +141,6 @@ class pooll {
 
 
 
-    private function submit($nonce,$argon){
-        $postData = http_build_query(
-	            [
-	                'argon'       => $argon,
-	                'nonce'       => $nonce,
-	                'private_key' => $this->config['private_key'],
-	                'public_key'  => $this->config['public_key'],
-	            ]
-	     );
-
-        $opts = [
-            'http' =>
-                [
-                    'method'  => 'POST',
-                    'header'  => 'Content-type: application/x-www-form-urlencoded',
-                    'content' => $postData,
-                ],
-        ];
-        $context = stream_context_create($opts);
-        $res = file_get_contents($this->config['node']."/Uinterface.php?m=submitNonce", false, $context);
-        
-        if ($res==false) {
-            return false;
-        }
-        $data = json_decode($res, true);
-
-        if ($data['result'] == 'ok') {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    private function peer_post($url, $data = [], $timeout = 60){
-        if ($timeout==='') {
-            $timeout=60;
-        }
-        $postdata = http_build_query(
-            [
-                'data' => json_encode($data),
-                "coin" => 'origin',
-            ]
-        );
-
-        $opts = [
-            'http' =>
-                [
-                    'timeout' => $timeout,
-                    'method'  => 'POST',
-                    'header'  => 'Content-type: application/x-www-form-urlencoded',
-                    'content' => $postdata,
-                ],
-        ];
-
-        $context = stream_context_create($opts);
-        $result = file_get_contents($url, false, $context);
-        if ($result==false) {
-            return false;
-        }
-        $res = json_decode($result, true);
-
-        // the function will return false if something goes wrong
-        if ($res) {
-            return $res;
-        }else{
-            return false;
-        }  
-    }
 
 
 }
