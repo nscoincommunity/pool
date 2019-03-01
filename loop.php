@@ -159,9 +159,12 @@ class loop{
 		$ress=$sql->select('user','*',0,array("balance>=".$this->config['min_pay']),'',0);
 		foreach ($ress as $value) {
 			$res=$sql->update('user',array('balance'=>0),array("id='".$value['id']."'"));
-			if ($this->peer_post($this->config['node'].'/Uinterface.php?m=sendtoaddress',array('fromaddress' =>$this->config['address'],'toaddress'=>$value['address'],'privatekey'=>$this->config['private_key'],'amount'=>$value['balance']),5)) {
+			$res_r=$this->peer_post($this->config['node'].'/Uinterface.php?m=sendtoaddressbyprivatekey',array('fromaddress' =>$this->config['address'],'toaddress'=>$value['address'],'privatekey'=>$this->config['private_key'],'amount'=>$value['balance']),5)
+			if (isset($res_r['result']) and $res_r['result']=='ok') {
 				$sql->add('send_',array('userid'=>$value['id'],'amount'=>$value['balance'],'timee'=>time()));
 			}
+		}else{
+			cache::set('error',$res_r['error'],0);
 		}
 		//
 		sleep(1);
