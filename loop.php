@@ -50,13 +50,10 @@ class loop{
             return false;
         }
         $res = json_decode($result, true);
-
-        // the function will return false if something goes wrong
-        if ($res) {
-            return $res;
-        }else{
-            return false;
-        }  
+        if (isset($res['error']) and $res['error']!=='') {
+        	cache::set('error',$res_r['error'],0);
+        }
+        return $res;
     }
 
     private function submit($nonce,$argon){
@@ -88,6 +85,7 @@ class loop{
         if ($data['result'] == 'ok') {
             return true;
         } else {
+        	cache::set('error_submit',$data['error'],0);
             return false;
         }
     }
@@ -158,13 +156,17 @@ class loop{
 		//send coin to user
 		$ress=$sql->select('user','*',0,array("balance>=".$this->config['min_pay']),'',0);
 		foreach ($ress as $value) {
-			$res=$sql->update('user',array('balance'=>0),array("id='".$value['id']."'"));
-			$res_r=$this->peer_post($this->config['node'].'/Uinterface.php?m=sendtoaddressbyprivatekey',array('fromaddress' =>$this->config['address'],'toaddress'=>$value['address'],'privatekey'=>$this->config['private_key'],'amount'=>$value['balance']),5)
-			if (isset($res_r['result']) and $res_r['result']=='ok') {
-				$sql->add('send_',array('userid'=>$value['id'],'amount'=>$value['balance'],'timee'=>time()));
+			//get real coin number .
+			$nnum=$value['balance']/1.01;
+			$nnum=number_format($nnum, 8, '.', '');
+			//send
+			$res_r=$this->peer_post($this->config['node'].'/Uinterface.php?m=sendtoaddressbyprivatekey',array('fromaddress' =>$this->config['address'],'toaddress'=>$value['address'],'privatekey'=>$this->config['private_key'],'amount'=>$nnum),5);
+			if (isset($res_r['result']) and ($res_r['result']=='ok')) {
+				$sql->add('send_',array('userid'=>$value['id'],'amount'=>$nnum,'timee'=>time()));
+				$res=$sql->update('user',array('balance'=>0),array("id='".$value['id']."'"));
+			}else{
+				cache::set('error',$res_r['error'],0);
 			}
-		}else{
-			cache::set('error',$res_r['error'],0);
 		}
 		//
 		sleep(1);
